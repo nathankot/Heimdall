@@ -464,7 +464,17 @@ public class Heimdall {
         
         return false
     }
-    
+
+    public func obtainKey(key: KeyType) -> SecKeyRef? {
+        if key == .Public && self.scope & ScopeOptions.PublicKey == ScopeOptions.PublicKey {
+            return Heimdall.obtainKey(self.publicTag)
+        } else if let tag = self.privateTag where key == .Private && self.scope & ScopeOptions.PrivateKey == ScopeOptions.PrivateKey {
+            return Heimdall.obtainKey(tag)
+        }
+
+        return nil
+    }
+
     //
     //  MARK: Private types
     //
@@ -494,16 +504,6 @@ public class Heimdall {
     //
     //  MARK: Private helpers
     //
-    private func obtainKey(key: KeyType) -> SecKeyRef? {
-        if key == .Public && self.scope & ScopeOptions.PublicKey == ScopeOptions.PublicKey {
-            return Heimdall.obtainKey(self.publicTag)
-        } else if let tag = self.privateTag where key == .Private && self.scope & ScopeOptions.PrivateKey == ScopeOptions.PrivateKey {
-            return Heimdall.obtainKey(tag)
-        }
-        
-        return nil
-    }
-    
     private func obtainKeyData(key: KeyType) -> NSData? {
         if key == .Public && self.scope & ScopeOptions.PublicKey == ScopeOptions.PublicKey {
             return Heimdall.obtainKeyData(self.publicTag)
