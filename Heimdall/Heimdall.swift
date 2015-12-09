@@ -222,7 +222,7 @@ public class Heimdall {
                 var encryptedLength = blockSize
                 let data = UnsafePointer<UInt8>(aesKey.bytes)
                 
-                switch SecKeyEncrypt(publicKey, .PKCS1, data, Int(aesKey.length), &encryptedData, &encryptedLength) {
+                switch SecKeyEncrypt(publicKey, .OAEP, data, Int(aesKey.length), &encryptedData, &encryptedLength) {
                 case noErr:
                     result.appendBytes(&encryptedData, length: encryptedLength)
                 default:
@@ -281,7 +281,7 @@ public class Heimdall {
                 let decryptedKeyData = UnsafeMutablePointer<UInt8>(decryptedKey.mutableBytes)
                 var decryptedLength = blockSize
                 
-                let keyStatus = SecKeyDecrypt(key, .PKCS1, encryptedKeyData, keyData.length, decryptedKeyData, &decryptedLength)
+                let keyStatus = SecKeyDecrypt(key, .OAEP, encryptedKeyData, keyData.length, decryptedKeyData, &decryptedLength)
                 
                 if keyStatus == noErr {
                     decryptedKey.length = Int(decryptedLength)
