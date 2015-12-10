@@ -468,7 +468,7 @@ public class Heimdall {
     //
     //  MARK: Private types
     //
-    private enum KeyType {
+    public enum KeyType {
         case Public
         case Private
     }
@@ -494,7 +494,7 @@ public class Heimdall {
     //
     //  MARK: Private helpers
     //
-    private func obtainKey(key: KeyType) -> SecKeyRef? {
+    public func obtainKey(key: KeyType) -> SecKeyRef? {
         if key == .Public && self.scope & ScopeOptions.PublicKey == ScopeOptions.PublicKey {
             return Heimdall.obtainKey(self.publicTag)
         } else if let tag = self.privateTag where key == .Private && self.scope & ScopeOptions.PrivateKey == ScopeOptions.PrivateKey {
