@@ -56,9 +56,9 @@ public class Heimdall {
      privateTag: String? = nil, privateKeyData: NSData? = nil) {
 
         // Ensure public key is registered first
-        if let existingData = Heimdall.obtainKeyData(publicTag),
-               newData = publicKeyData?.dataByStrippingX509Header() {
-            if !existingData.isEqualToData(newData) {
+        if let existingData = Heimdall.obtainKeyData(publicTag) {
+            if let newData = publicKeyData?.dataByStrippingX509Header()
+               where !existingData.isEqualToData(newData) {
                 Heimdall.updateKey(publicTag, data: newData)
             }
         } else if let data = publicKeyData?.dataByStrippingX509Header() {

@@ -71,6 +71,15 @@ class HeimdallTests: XCTestCase {
         XCTAssertNotNil(pubX509)
         pubX509?.destroy()
     }
+
+    func testPublicReInititialization() {
+        let basic = Heimdall(tagPrefix: "public.reinit.test")
+        let again = Heimdall(publicTag: "public.reinit.test")
+        XCTAssertNotNil(again)
+        XCTAssertTrue(basic!.publicKeyData()!.isEqualToData(again!.publicKeyData()!))
+        basic?.destroy()
+        again?.destroy()
+    }
     
     func testExport() {
         // Exporting the public key should work from both public/private instances, but not from destroyed instances
