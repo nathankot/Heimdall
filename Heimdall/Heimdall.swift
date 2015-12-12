@@ -48,12 +48,18 @@ public class Heimdall {
     }
     
     /// 
-    /// Create an instance with data for the public key, and optionally the private key
+    /// Create an instance with data for the public key,
     /// the keychain is updated with the tag given (call .destroy() to remove)
     ///
+    /// - parameters:
+    ///     - publicTag: Tag of the public key, keychain is checked for existing key (updated if data
+    /// provided is non-nil and does not match)
+    ///     - publicKeyData: Bits of the public key, can include the X509 header (will be stripped)
+    ///
+    /// - returns: Heimdall instance that can handle only public key operations
+    ///
     public convenience init?
-    (publicTag: String, publicKeyData: NSData? = nil,
-     privateTag: String? = nil, privateKeyData: NSData? = nil) {
+    (publicTag: String, publicKeyData: NSData? = nil) {
 
         // Ensure public key is registered first
         if let existingData = Heimdall.obtainKeyData(publicTag) {
@@ -69,27 +75,9 @@ public class Heimdall {
             return nil
         }
 
-        // Ensure private key is registered is required
-        if let pt = privateTag {
-            if let existingData = Heimdall.obtainKeyData(pt),
-               newData = privateKeyData?.dataByStrippingX509Header() {
-                if !existingData.isEqualToData(newData) {
-                    Heimdall.updateKey(pt, data: newData)
-                }
-            } else if let data = privateKeyData?.dataByStrippingX509Header() {
-                if Heimdall.insertPrivateKey(pt, data: data) == nil {
-                    return nil
-                }
-            } else {
-                return nil
-            }
-        }
-
-        self.init(scope: privateTag != nil
-          ? ScopeOptions.All
-          : ScopeOptions.PublicKey,
-          publicTag: publicTag,
-          privateTag: privateTag)
+        self.init(scope: ScopeOptions.PublicKey,
+                  publicTag: publicTag,
+                  privateTag: privateTag)
 
     }
   
@@ -599,18 +587,10 @@ public class Heimdall {
     }
     
     private class func insertPublicKey(publicTag: String, data: NSData) -> SecKeyRef? {
-        return insertKey(publicTag, data: data)
-    }
-    
-    private class func insertPrivateKey(privateTag: String, data: NSData) -> SecKeyRef? {
-        return insertKey(privateTag, data: data)
-    }
-
-    private class func insertKey(tag: String, data: NSData) -> SecKeyRef? {
         var publicAttributes = Dictionary<String, AnyObject>()
         publicAttributes[String(kSecAttrKeyType)] = kSecAttrKeyTypeRSA
         publicAttributes[String(kSecClass)] = kSecClassKey as CFStringRef
-        publicAttributes[String(kSecAttrApplicationTag)] = tag as CFStringRef
+        publicAttributes[String(kSecAttrApplicationTag)] = publicTag as CFStringRef
         publicAttributes[String(kSecValueData)] = data as CFDataRef
         publicAttributes[String(kSecReturnPersistentRef)] = true as CFBooleanRef
         
@@ -621,7 +601,7 @@ public class Heimdall {
             return nil
         }
         
-        return Heimdall.obtainKey(tag)
+        return Heimdall.obtainKey(publicTag)
     }
     
     private class func generateKeyPair(publicTag: String, privateTag: String, keySize: Int) -> (publicKey: SecKeyRef, privateKey: SecKeyRef)? {
