@@ -77,7 +77,7 @@ public class Heimdall {
 
         self.init(scope: ScopeOptions.PublicKey,
                   publicTag: publicTag,
-                  privateTag: privateTag)
+                  privateTag: nil)
 
     }
   
